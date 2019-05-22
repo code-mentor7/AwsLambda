@@ -9,8 +9,8 @@ provider:
   stage: ${opt:stage, 'desa'}
   timeout: 30
   environment:
-      RDS_HOSTNAME: ${file(./env.yml):custom.RDS_HOSTNAME} 
-      RDS_USERNAME: ${file(./env.yml):custom.RDS_USERNAME}    
+      RDS_HOSTNAME: ${file(./env.yml):custom.RDS_HOSTNAME}
+      RDS_USERNAME: ${file(./env.yml):custom.RDS_USERNAME}
       RDS_PASSWORD: ${file(./env.yml):custom.RDS_PASSWORD}
       RDS_PORT1: ${file(./env.yml):custom.RDS_PORT1}
       RDS_DATABASE: ${file(./env.yml):custom.RDS_DATABASE}
@@ -19,7 +19,23 @@ package:
     exclude:
       - /node_modules
 
-functions: 
+functions:
+  findAfiliado:
+    handler: crud/afiliado.findAll
+    events:
+      - http:
+          path: afiliado
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - X-Requested-With
   findAll:
     handler: crud/artistas.findAll
     events:
