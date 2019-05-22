@@ -9,7 +9,7 @@ module.exports.findAll = async (event, context) => {
         include: [{
             model: Afiliado,
             through: {
-                attributes: ['artistasId', 'afiliadoId']
+                attributes: []
             }
         }]
     }).map(el => el.get({ plain: true })).then(res => {
