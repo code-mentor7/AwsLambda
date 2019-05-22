@@ -1,0 +1,31 @@
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize(
+    process.env.RDS_DATABASE,
+    process.env.RDS_USERNAME,
+    process.env.RDS_PASSWORD,
+    {
+        host: process.env.RDS_HOSTNAME,
+        dialect: 'mysql',
+        operatorsAliases: false
+    });
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+db.artistas = require('../models/artistas.model')(sequelize, Sequelize);
+db.paises = require('../models/paises.model')(sequelize, Sequelize);
+
+//Join Related tables with foreignKey
+db.artistas.belongsTo(db.paises, {as: 'pais', foreignKey: 'paiseId' });
+
+db.sequelize
+    .query('SET FOREIGN_KEY_CHECKS = 0', null, {raw: true})
+    .then(function(results) {
+        db.sequelize.sync().then(() =>{
+            console.log('Drop and Resync with { force: false }');
+        });
+    });
+
+module.exports = db;

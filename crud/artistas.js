@@ -1,4 +1,7 @@
 'use strict';
+const db = require('../config/db.config');
+const Artistas = db.artistas;
+const Paises = db.paises;
 
 const mysql = require('serverless-mysql')({
     config: {
@@ -50,67 +53,30 @@ module.exports.findAll = async (event, context) => {
   }
 
 
-  let artistas;
+  let artistas = await Artistas.findAll({
+    attributes: {
+      exclude: ['paiseId']
+    },
+    include: [{
+      model: Paises,
+      as: 'pais'
+    }]
+  }).map(el => el.get({ plain: true })).then(res => {
+    return res;
+  }).catch(err => console.log('error', err));
 
-  let query = "SELECT * FROM artistas ";
-    query = query + " limit " + (page - 1) + ", " + perpage;
-
-    
-
-     await mysql.query(query)
-     .then(function(rows){
-      // Logs out a list of hobbits
-      artistas =  JSON.parse(JSON.stringify(rows));
-      //totalArtist = JSON.parse(JSON.stringify(rows))[0].total;
-  }).catch(function(err) {   
-    console.error(err);
-    error = err.errno;
-  
-  
-  })
-;
-
-
-    await mysql.end();
-
-    return {
-      statusCode: 200, 
-      body: JSON.stringify({
-        data : artistas, 
-          pagination: {
-              records_per_page: perpage,
-              current_page: page,
-              total_pages: Math.ceil(totalArtist / perpage),
-              totalRows: totalArtist
-                }
-          }
-        
-        )
-    };
-
-
-  
-   /*
-    const sql = 'SELECT * FROM artistas ';
-
-
-    const query = Util.promisify(connection.query).bind(connection);
-    var artistas = await query(sql );
-    
-
-    for(let i = 0; i < artistas.length; i++)
-    {
-      if (artistas[i].idgenero){
-        const query = Util.promisify(connection.query).bind(connection);
-        artistas[i].genero = await query("select id, descripcion from genero where id =" + artistas[i].idGenero);
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      data : artistas,
+      pagination: {
+        records_per_page: perpage,
+        current_page: page,
+        total_pages: Math.ceil(totalArtist / perpage),
+        totalRows: totalArtist
       }
-    }
-*/
-  /*  return {
-      statusCode: 200, 
-      body: JSON.stringify(artistas)
-    };*/
-
+    })
+  };
     
 };
 
